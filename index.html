@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agentic GIS Architecture with SPAR, RAG, ArcGIS Knowledge, and ArcGIS Geoprocessing</title>
+  <style>
+    :root{
+      --bg:#f7fbff;--card:#ffffff;--ink:#0f172a;--muted:#475569;--line:#e5e7eb;
+      --sense:#e0f2fe;--plan:#fef9c3;--act:#ede9fe;--reflect:#fce7f3;
+      --rag:#fef08a;--gis:#bbf7d0;--hyb:#fcd34d;--soft:#eef2ff;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    .wrap{max-width:1200px;margin:28px auto;padding:20px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 28px rgba(2,6,23,.06);padding:22px}
+    h1{margin:0 0 6px;font-weight:800;letter-spacing:-.02em}
+    .subtitle{margin:0 0 18px;color:var(--muted)}
+    .legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px}
+    .pill{display:inline-flex;gap:8px;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:#f9fafb;font-size:12px}
+    .dot{width:10px;height:10px;border-radius:50%}
+    h2{margin:22px 0 10px}
+    h3{margin:14px 0 6px}
+    p{margin:.4rem 0}
+    ul{margin:.2rem 0 .6rem 1.2rem}
+    table{width:100%;border-collapse:collapse;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+    th,td{border-bottom:1px solid var(--line);padding:10px 12px;text-align:left}
+    th{background:#f8fafc;font-weight:700}
+    tr:last-child td{border-bottom:none}
+    code{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px}
+    footer{margin-top:14px;color:#64748b;font-size:12px}
+    .note{background:#eff6ff;border:1px solid #dbeafe;padding:10px;border-radius:10px;color:#1e3a8a}
+    @media print{.wrap{max-width:100%;margin:0}.card{box-shadow:none;border:none}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Agentic GIS Architecture with SPAR, RAG, ArcGIS Knowledge, and ArcGIS Geoprocessing</h1>
+      <p class="subtitle">This visualization shows how a user query is interpreted by the LLM Orchestrator, verified using RAG and ArcGIS Knowledge (queried with openCypher), executed by the GIS Agent and ArcGIS Geoprocessing layer, and then reflected back through the SPAR loop (Sense → Plan → Act → Reflect).</p>
+
+      <!-- MAIN SPAR FLOW SVG (Reasoning Path) -->
+      <svg viewBox="0 0 1180 520" width="100%" height="auto" role="img" aria-label="Agentic GIS reasoning path">
+        <defs>
+          <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.12"/>
+          </filter>
+          <style><![CDATA[
+            .box{rx:12;ry:12;stroke:#1f2937;stroke-width:1}
+            .title{font:700 15px 'Inter',Segoe UI,Arial}
+            .small{font:500 12px 'Inter',Segoe UI,Arial;fill:#475569}
+            .lane{font:700 13px 'Inter',Segoe UI,Arial;fill:#0f172a}
+            .arrow{stroke:#0f172a;stroke-width:2;marker-end:url(#m);fill:none}
+          ]]></style>
+          <marker id="m" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#0f172a"/>
+          </marker>
+        </defs>
+
+        <!-- SPAR lanes -->
+        <g opacity="0.95">
+          <rect x="20" y="20" width="1140" height="110" fill="var(--sense)" stroke="#0284c7" stroke-width="1" rx="14"/>
+          <text x="30" y="45" class="lane">Sense</text>
+
+          <rect x="20" y="140" width="1140" height="120" fill="var(--plan)" stroke="#ca8a04" stroke-width="1" rx="14"/>
+          <text x="30" y="165" class="lane">Plan</text>
+
+          <rect x="20" y="270" width="1140" height="160" fill="var(--act)" stroke="#7e22ce" stroke-width="1" rx="14"/>
+          <text x="30" y="295" class="lane">Act</text>
+
+          <rect x="20" y="440" width="1140" height="60" fill="var(--reflect)" stroke="#be185d" stroke-width="1" rx="14"/>
+          <text x="30" y="468" class="lane">Reflect</text>
+        </g>
+
+        <!-- Nodes -->
+        <g filter="url(#shadow)">
+          <!-- Sense -->
+          <rect class="box" x="120" y="55" width="220" height="50" fill="#bfdbfe"/>
+          <text x="230" y="83" text-anchor="middle" class="title">User Chat / Workflow</text>
+          <text x="230" y="100" text-anchor="middle" class="small">e.g., “Is parcel 202A‑1156 compliant?”</text>
+
+          <rect class="box" x="430" y="55" width="260" height="50" fill="#dbeafe"/>
+          <text x="560" y="83" text-anchor="middle" class="title">LLM Orchestrator (Planner)</text>
+          <text x="560" y="100" text-anchor="middle" class="small">intent detection & tool selection</text>
+
+          <!-- Plan -->
+          <rect class="box" x="160" y="190" width="260" height="60" fill="var(--rag)"/>
+          <text x="290" y="214" text-anchor="middle" class="title">RAG Agent</text>
+          <text x="290" y="232" text-anchor="middle" class="small">by‑laws / PDFs / SOPs (vector DB)</text>
+
+          <rect class="box" x="460" y="190" width="260" height="60" fill="var(--gis)"/>
+          <text x="590" y="214" text-anchor="middle" class="title">GIS Agent (Agentic AI Layer)</text>
+          <text x="590" y="232" text-anchor="middle" class="small">ArcGIS Knowledge (openCypher)</text>
+
+          <rect class="box" x="760" y="190" width="260" height="60" fill="var(--hyb)"/>
+          <text x="890" y="214" text-anchor="middle" class="title">Hybrid Path</text>
+          <text x="890" y="232" text-anchor="middle" class="small">RAG + GIS combined</text>
+
+          <!-- Act -->
+          <rect class="box" x="160" y="320" width="260" height="60" fill="#fff"/>
+          <text x="290" y="344" text-anchor="middle" class="title">Semantic Answer</text>
+          <text x="290" y="362" text-anchor="middle" class="small">policy explanation / summary</text>
+
+          <rect class="box" x="460" y="320" width="260" height="60" fill="#fff"/>
+          <text x="590" y="344" text-anchor="middle" class="title">Graph/Spatial Result</text>
+          <text x="590" y="362" text-anchor="middle" class="small">features / relationships / layers</text>
+
+          <rect class="box" x="760" y="320" width="260" height="60" fill="#e9d5ff"/>
+          <text x="890" y="344" text-anchor="middle" class="title">Combine Evidence</text>
+          <text x="890" y="362" text-anchor="middle" class="small">apply rules on parcel geometry</text>
+
+          <rect class="box" x="460" y="390" width="260" height="60" fill="#c7d2fe"/>
+          <text x="590" y="414" text-anchor="middle" class="title">Output</text>
+          <text x="590" y="432" text-anchor="middle" class="small">Compliance summary / map layer / report</text>
+
+          <!-- Reflect -->
+          <rect class="box" x="460" y="455" width="260" height="36" fill="#f5d0fe"/>
+          <text x="590" y="478" text-anchor="middle" class="title">Update ArcGIS Knowledge • Tune Prompts/Rules</text>
+        </g>
+
+        <!-- Arrows -->
+        <path class="arrow" d="M 340 80 L 430 80"/>
+        <path class="arrow" d="M 560 105 L 560 190"/>
+        <path class="arrow" d="M 560 105 C 560 150 290 150 290 190"/>
+        <path class="arrow" d="M 560 105 C 560 150 890 150 890 190"/>
+        <path class="arrow" d="M 290 250 L 290 320"/>
+        <path class="arrow" d="M 590 250 L 590 320"/>
+        <path class="arrow" d="M 890 250 L 890 320"/>
+        <path class="arrow" d="M 290 380 C 290 400 590 400 590 390"/>
+        <path class="arrow" d="M 890 380 C 890 405 590 405 590 390"/>
+        <path class="arrow" d="M 590 450 L 590 455"/>
+      </svg>
+
+      <!-- Legend -->
+      <div class="legend">
+        <span class="pill"><span class="dot" style="background:var(--sense)"></span> Sense</span>
+        <span class="pill"><span class="dot" style="background:var(--plan)"></span> Plan</span>
+        <span class="pill"><span class="dot" style="background:var(--act)"></span> Act</span>
+        <span class="pill"><span class="dot" style="background:var(--reflect)"></span> Reflect</span>
+        <span class="pill"><span class="dot" style="background:var(--rag)"></span> RAG</span>
+        <span class="pill"><span class="dot" style="background:var(--gis)"></span> GIS Agent (Agentic AI Layer)</span>
+        <span class="pill"><span class="dot" style="background:var(--hyb)"></span> Hybrid</span>
+      </div>
+
+      <h2>Decision Flow — Cases</h2>
+      <h3>CASE A — ArcGIS Knowledge Query → RAG</h3>
+      <ul>
+        <li><strong>Intent:</strong> Semantic / document reasoning</li>
+        <li><strong>Examples:</strong> “What are the height limits in Zone B1?” “Summarize residential by‑law.”</li>
+        <li><strong>Path:</strong> LLM → RAG → Vector Store (by‑laws, PDFs, SOPs) → Answer synthesis</li>
+        <li><strong>Output:</strong> Textual reasoning response</li>
+      </ul>
+
+      <h3>CASE B — Spatial / Entity Query → GIS Agent</h3>
+      <ul>
+        <li><strong>Intent:</strong> Graph / spatial relationship reasoning</li>
+        <li><strong>Examples:</strong> “Show parcels linked to owner XYZ” “Find parcels intersecting flood zones.”</li>
+        <li><strong>Path:</strong> LLM → GIS Agent (openCypher & Feature Services) → Response</li>
+        <li><strong>Output:</strong> Features, relationships, spatial layers</li>
+      </ul>
+
+      <h3>CASE C — Hybrid Reasoning → RAG + GIS Agent</h3>
+      <ul>
+        <li><strong>Intent:</strong> Policy reasoning and spatial validation</li>
+        <li><strong>Examples:</strong> “Is parcel 202A‑1156 compliant?” “Highlight non‑compliant parcels per latest by‑law.”</li>
+        <li><strong>Path:</strong> RAG fetches rule context → GIS Agent retrieves parcel/zoning/geometry → LLM combines to a compliance summary</li>
+        <li><strong>Output:</strong> Compliance report with citations & evidence</li>
+      </ul>
+
+      <h2>Architectural Summary</h2>
+      <table>
+        <thead><tr><th>Query Type</th><th>Entry</th><th>Uses RAG?</th><th>Uses GIS Agent?</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td>Text / Policy</td><td>LLM</td><td>✅ Yes</td><td>❌ No</td><td>Explain zoning rule for B1</td></tr>
+          <tr><td>Spatial / Entity</td><td>LLM</td><td>❌ No</td><td>✅ Yes</td><td>Show parcels in Zone B1</td></tr>
+          <tr><td>Hybrid Validation</td><td>LLM</td><td>✅ Yes</td><td>✅ Yes</td><td>Is parcel 202A‑1156 compliant?</td></tr>
+        </tbody>
+      </table>
+
+      <h2>🆚 Quick Comparison</h2>
+      <ul>
+        <li><strong>RAG:</strong> Fast to stand up; excels at text Q&A over policies; needs good chunking/embeddings.</li>
+        <li><strong>GIS Agent (Agentic AI Layer):</strong> Authoritative relationships & lineage; ideal for parcel→zone→permit traversal.</li>
+        <li><strong>Together:</strong> Use RAG for policy clauses + GIS Agent for authoritative entities; merge in the agent’s plan.</li>
+        <li><strong>Action:</strong> Both feed the same Agent to run ArcGIS tasks and produce evidence‑based outputs.</li>
+      </ul>
+
+      <h2>🧠 Agent Execution Layer — How It Runs Internally</h2>
+      <p class="note">All AI and GIS components rely on the same official geospatial data infrastructure (SDI), ensuring that:<br>
+      • <strong>Text-based reasoning (RAG)</strong> and <strong>map-based validation (GIS Agent)</strong> remain aligned.<br>
+      • Results are <strong>consistent, traceable, and grounded in authoritative evidence</strong>.</p>
+
+      <!-- BACKEND EXECUTION ARCHITECTURE SVG -->
+      <svg viewBox="0 0 1180 360" width="100%" height="auto" role="img" aria-label="Planner Agent backend architecture">
+        <defs>
+          <filter id="s2" x="-10%" y="-10%" width="120%" height="120%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.12"/></filter>
+          <style><![CDATA[
+            .bx{rx:12;ry:12;stroke:#1f2937;stroke-width:1}
+            .t{font:700 15px 'Inter',Segoe UI,Arial}
+            .s{font:500 12px 'Inter',Segoe UI,Arial;fill:#475569}
+            .arr{stroke:#0f172a;stroke-width:2;marker-end:url(#m2);fill:none}
+          ]]></style>
+          <marker id="m2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#0f172a"/>
+          </marker>
+        </defs>
+
+        <!-- Planner & ArcGIS Knowledge & Evaluation -->
+        <g filter="url(#s2)">
+          <rect class="bx" x="60" y="30" width="320" height="70" fill="#dbeafe"/>
+          <text x="220" y="58" text-anchor="middle" class="t">Planner Agent</text>
+          <text x="220" y="76" text-anchor="middle" class="s">Plan → Act → Evaluate → Refine</text>
+
+          <rect class="bx" x="420" y="30" width="320" height="70" fill="var(--gis)"/>
+          <text x="580" y="58" text-anchor="middle" class="t">ArcGIS ArcGIS Knowledge</text>
+          <text x="580" y="76" text-anchor="middle" class="s">openCypher / relationships</text>
+
+          <rect class="bx" x="780" y="30" width="320" height="70" fill="#fde68a"/>
+          <text x="940" y="58" text-anchor="middle" class="t">Evaluation Loop</text>
+          <text x="940" y="76" text-anchor="middle" class="s">Reflect → Prompt/Rule Tuning</text>
+        </g>
+
+        <!-- Tools row -->
+        <g filter="url(#s2)">
+          <rect class="bx" x="60" y="130" width="250" height="60" fill="#fff"/>
+          <text x="185" y="158" text-anchor="middle" class="t">ArcGIS Pro / ArcPy</text>
+
+          <rect class="bx" x="340" y="130" width="250" height="60" fill="#fff"/>
+          <text x="465" y="158" text-anchor="middle" class="t">Model Inference API</text>
+
+          <rect class="bx" x="620" y="130" width="250" height="60" fill="#fff"/>
+          <text x="745" y="158" text-anchor="middle" class="t">pgvector RAG</text>
+
+          <rect class="bx" x="900" y="130" width="250" height="60" fill="#fff"/>
+          <text x="1025" y="158" text-anchor="middle" class="t">LLM Pipeline</text>
+        </g>
+
+        <!-- Shared data sources -->
+        <g filter="url(#s2)">
+          <rect class="bx" x="60" y="230" width="1090" height="60" fill="var(--soft)"/>
+          <text x="605" y="256" text-anchor="middle" class="t">Shared Spatial Data Sources</text>
+          <text x="605" y="276" text-anchor="middle" class="s">UAV LiDAR • Cadastral Maps • Zoning • Permits</text>
+        </g>
+
+        <!-- Arrows -->
+        <path class="arr" d="M 380 65 L 420 65"/>
+        <path class="arr" d="M 740 65 L 780 65"/>
+        <path class="arr" d="M 220 100 L 185 130"/>
+        <path class="arr" d="M 580 100 L 465 130"/>
+        <path class="arr" d="M 580 100 L 745 130"/>
+        <path class="arr" d="M 940 100 L 1025 130"/>
+        <path class="arr" d="M 185 190 L 605 230"/>
+        <path class="arr" d="M 465 190 L 605 230"/>
+        <path class="arr" d="M 745 190 L 605 230"/>
+        <path class="arr" d="M 1025 190 L 605 230"/>
+      </svg>
+
+      <p class="s">
+        All tools operate on the same authoritative SDI backbone, ensuring that policy reasoning (RAG) and spatial validation (GIS Agent) produce consistent, evidence-based decisions.
+      </p>
+
+      <!-- Technology Stack Supporting the Flow -->
+      <h2>Technology Stack Supporting the Flow</h2>
+      <ul>
+        <li><strong>LLMs:</strong> GPT‑4o / Llama‑3 / Mistral</li>
+        <li><strong>Agent Framework:</strong> LangChain / LangGraph</li>
+        <li><strong>Knowledge Integration:</strong> ArcGIS Knowledge (openCypher)</li>
+        <li><strong>Automation Interfaces:</strong> ArcGIS API for Python / ArcPy</li>
+        <li><strong>Orchestration Layer:</strong> FastAPI Side‑Car</li>
+      </ul>
+
+      <!-- From GIS Automation to Agentic GIS — From Rules to Reasoning -->
+      <h2>From GIS Automation to Agentic GIS — From Rules to Reasoning</h2>
+      <p>How today’s workflows evolve when we add an agentic layer (LLMs + LangChain + ArcGIS Knowledge) as a non‑disruptive side‑car.</p>
+      <ol>
+        <li><strong>Interaction:</strong> Forms, scripts, fixed filters ➜ Natural‑language questions & tasks; agents plan steps and call tools.</li>
+        <li><strong>Reasoning:</strong> Predefined rules & geoprocessing models ➜ LLM reasoning + policy interpretation with traceable steps.</li>
+        <li><strong>Workflow:</strong> Single‑app automation ➜ Multi‑agent orchestration across apps (Permit, Registry, EO, Environment).</li>
+        <li><strong>Data Context:</strong> Static layers or single‑system APIs ➜ Semantic retrieval + ArcGIS Knowledge linking parcels ↔ zones ↔ owners.</li>
+        <li><strong>Action:</strong> Manual hand‑offs; scheduled jobs ➜ Agents execute via ArcGIS API / ArcPy & Workflow Manager; trigger side‑car APIs.</li>
+        <li><strong>Learning:</strong> No feedback loop ➜ SPAR Reflect: results logged to ArcGIS Knowledge; prompts/rules improve.</li>
+        <li><strong>Governance:</strong> User roles per app ➜ ABAC/RBAC tokens for agent connectors; audit of actions & evidence.</li>
+      </ol>
+
+      <footer>© 2025 · Aduri Sreenivas · MicroCenter Gulf</footer>
+    </div>
+  </div>
+</body>
+</html>
