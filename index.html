@@ -143,28 +143,30 @@
       </div>
 
       <h2>Decision Flow — Cases</h2>
+
       <h3>CASE A — ArcGIS Knowledge Query → RAG</h3>
       <ul>
-        <li><strong>Intent:</strong> Semantic / document reasoning</li>
+        <li><strong>Intent:</strong> Semantic / document reasoning (policy lookup, clause explanation).</li>
+        <li><strong>How it routes:</strong> <em>LLM Orchestrator</em> detects a policy/text question and routes to RAG. If entities are mentioned (e.g., “Zone B1”, parcel type), it first queries <em>ArcGIS Knowledge</em> (openCypher) to resolve the correct entities/IDs and passes them as grounding to RAG.</li>
         <li><strong>Examples:</strong> “What are the height limits in Zone B1?” “Summarize residential by‑law.”</li>
-        <li><strong>Path:</strong> LLM → RAG → Vector Store (by‑laws, PDFs, SOPs) → Answer synthesis</li>
-        <li><strong>Output:</strong> Textual reasoning response</li>
+        <li><strong>Path:</strong> LLM Orchestrator → Intent Router → (ArcGIS Knowledge entity lookup, optional) → RAG → Vector Store (by‑laws, PDFs, SOPs) → Answer synthesis with citations.</li>
+        <li><strong>Output:</strong> Textual reasoning response grounded by clauses, with citations and links to relevant KG entities.</li>
       </ul>
 
       <h3>CASE B — Spatial / Entity Query → GIS Agent</h3>
       <ul>
-        <li><strong>Intent:</strong> Graph / spatial relationship reasoning</li>
-        <li><strong>Examples:</strong> “Show parcels linked to owner XYZ” “Find parcels intersecting flood zones.”</li>
-        <li><strong>Path:</strong> LLM → GIS Agent (openCypher & Feature Services) → Response</li>
-        <li><strong>Output:</strong> Features, relationships, spatial layers</li>
+        <li><strong>Intent:</strong> Graph / spatial relationship reasoning.</li>
+        <li><strong>How it routes:</strong> <em>LLM Orchestrator</em> detects a spatial/entity query. It resolves IDs and relationships in <em>ArcGIS Knowledge</em> (openCypher) — e.g., Owner → Parcels, asset → network segment — then the <em>GIS Agent</em> executes feature/graph operations via ArcGIS Feature/Map/GP services and returns map selections and relationships.</li><li><strong>Examples:</strong> “Show parcels linked to owner XYZ” “Check whether parcel 202A‑1156 overlaps a utility or road‑easement corridor.” “List parcels within 10 m of a high‑voltage line.” “Find road segments lacking recorded water connections.”</li>
+        <li><strong>Path:</strong> LLM → GIS Agent (openCypher &amp; Feature Services) → Response.</li>
+        <li><strong>Output:</strong> Features, relationships, spatial layers.</li>
       </ul>
 
       <h3>CASE C — Hybrid Reasoning → RAG + GIS Agent</h3>
       <ul>
-        <li><strong>Intent:</strong> Policy reasoning and spatial validation</li>
-        <li><strong>Examples:</strong> “Is parcel 202A‑1156 compliant?” “Highlight non‑compliant parcels per latest by‑law.”</li>
-        <li><strong>Path:</strong> RAG fetches rule context → GIS Agent retrieves parcel/zoning/geometry → LLM combines to a compliance summary</li>
-        <li><strong>Output:</strong> Compliance report with citations & evidence</li>
+        <li><strong>Intent:</strong> Policy reasoning and spatial validation.</li>
+        <li><strong>How it routes:</strong> Planner classifies as policy + spatial validation. <em>RAG</em> retrieves the governing clauses; in parallel/next the <em>GIS Agent</em> fetches parcel/zoning/utility geometry and runs ArcGIS geoprocessing. The <em>LLM</em> synthesizes a compliance verdict; <em>Reflect</em> logs evidence back to ArcGIS Knowledge.</li><li><strong>Examples:</strong> “Is parcel 202A‑1156 compliant with zoning and utility‑easement rules?” “Highlight parcels that fail minimum road‑access width requirements.”</li>
+        <li><strong>Path:</strong> RAG fetches rule context → GIS Agent retrieves parcel/zoning/geometry &amp; utility overlays → LLM combines to a compliance summary.</li>
+        <li><strong>Output:</strong> Compliance report with citations &amp; evidence (PASS / WARN / FAIL).</li>
       </ul>
 
       <h2>Architectural Summary</h2>
@@ -179,8 +181,8 @@
 
       <h2>🆚 Quick Comparison</h2>
       <ul>
-        <li><strong>RAG:</strong> Fast to stand up; excels at text Q&A over policies; needs good chunking/embeddings.</li>
-        <li><strong>GIS Agent (Agentic AI Layer):</strong> Authoritative relationships & lineage; ideal for parcel→zone→permit traversal.</li>
+        <li><strong>RAG:</strong> Fast to stand up; excels at text Q&amp;A over policies; needs good chunking/embeddings.</li>
+        <li><strong>GIS Agent (Agentic AI Layer):</strong> Authoritative relationships &amp; lineage; ideal for parcel→zone→permit traversal.</li>
         <li><strong>Together:</strong> Use RAG for policy clauses + GIS Agent for authoritative entities; merge in the agent’s plan.</li>
         <li><strong>Action:</strong> Both feed the same Agent to run ArcGIS tasks and produce evidence‑based outputs.</li>
       </ul>
@@ -212,7 +214,7 @@
           <text x="220" y="76" text-anchor="middle" class="s">Plan → Act → Evaluate → Refine</text>
 
           <rect class="bx" x="420" y="30" width="320" height="70" fill="var(--gis)"/>
-          <text x="580" y="58" text-anchor="middle" class="t">ArcGIS ArcGIS Knowledge</text>
+          <text x="580" y="58" text-anchor="middle" class="t">ArcGIS Knowledge</text>
           <text x="580" y="76" text-anchor="middle" class="s">openCypher / relationships</text>
 
           <rect class="bx" x="780" y="30" width="320" height="70" fill="#fde68a"/>
@@ -269,7 +271,6 @@
         <li><strong>Orchestration Layer:</strong> FastAPI Side‑Car</li>
       </ul>
 
-      <!-- From GIS Automation to Agentic GIS — From Rules to Reasoning -->
       <h2>From GIS Automation to Agentic GIS — From Rules to Reasoning</h2>
       <p>How today’s workflows evolve when we add an agentic layer (LLMs + LangChain + ArcGIS Knowledge) as a non‑disruptive side‑car.</p>
       <ol>
